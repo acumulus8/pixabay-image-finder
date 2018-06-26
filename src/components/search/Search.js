@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import TextField from "material-ui/TextField";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
-import axios from "axios";
+//import axios from "axios";
 import ImageResults from "../image-results/ImageResults";
 
 class Search extends Component {
@@ -15,7 +15,7 @@ class Search extends Component {
     errorMessage: ""
   };
 
-  onTextChange = e => {
+  /* onTextChange = e => {
     const val = e.target.value;
     this.setState({ [e.target.name]: val }, () => {
       if (val === "") {
@@ -31,12 +31,42 @@ class Search extends Component {
           .catch(err => console.log(err));
       }
     });
+  }; */
+
+  onTextChange = e => {
+    const val = e.target.value;
+    this.setState({ [e.target.name]: val }, () => {
+      if (val === "") {
+        this.setState({ images: [], errorMessage: "No images to show" });
+      } else {
+        return fetch(
+          `${this.state.apiUrl}/?key=${this.state.apiKey}&q=${
+            this.state.searchText
+          }&image_type=photo&per_page=${this.state.amount}&safesearch=true`
+        )
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error("Network response was not OK!");
+          })
+          .then(jsonResponse => {
+            this.setState({ images: jsonResponse.hits });
+          })
+          .catch(error =>
+            console.log(
+              "There has been a problem with your fetch operation: ",
+              error.message
+            )
+          );
+      }
+    });
   };
 
   onAmountChange = (e, index, value) => this.setState({ amount: value });
 
   render() {
-    const padding = { "padding-left": "30px"};
+    const padding = { "paddingLeft": "30px" };
     const noResults = (
       <span style={padding}>
         <strong>0</strong> results found
@@ -72,7 +102,7 @@ class Search extends Component {
         {this.state.images.length > 0 ? (
           <ImageResults images={this.state.images} />
         ) : (
-          <span>{this.state.errorMessage}</span>
+          <span style={padding}>{this.state.errorMessage}</span>
         )}
       </div>
     );
